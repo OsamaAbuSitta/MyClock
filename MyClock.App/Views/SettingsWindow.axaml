@@ -1,0 +1,81 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MyClock.App.ViewModels"
+        x:Class="MyClock.App.Views.SettingsWindow"
+        x:DataType="vm:SettingsWindowViewModel"
+        Title="Settings"
+        Width="320" Height="400"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <ScrollViewer>
+        <StackPanel Margin="20" Spacing="10">
+
+            <!-- Time Format -->
+            <TextBlock Text="Time Format" FontWeight="SemiBold"/>
+            <ToggleSwitch IsChecked="{Binding Use24HourFormat}"
+                          OnContent="24-hour" OffContent="12-hour"/>
+
+            <!-- Opacity -->
+            <TextBlock Text="Widget Opacity" Margin="0 6 0 0"/>
+            <Slider Minimum="0.3" Maximum="1.0"
+                    Value="{Binding Opacity}"
+                    TickFrequency="0.05"
+                    IsSnapToTickEnabled="True"/>
+
+            <Separator Margin="0 4"/>
+
+            <!-- Pomodoro Enable -->
+            <TextBlock Text="Pomodoro" FontWeight="SemiBold"/>
+            <ToggleSwitch IsChecked="{Binding PomodoroEnabled}"
+                          OnContent="Enabled" OffContent="Disabled"/>
+
+            <!-- Pomodoro durations — greyed out when Pomodoro is off -->
+            <StackPanel IsEnabled="{Binding PomodoroEnabled}" Spacing="6">
+
+                <Grid ColumnDefinitions="*,90" RowDefinitions="Auto,Auto,Auto,Auto"
+                      RowSpacing="6">
+
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="Focus (minutes)" VerticalAlignment="Center"/>
+                    <NumericUpDown Grid.Row="0" Grid.Column="1"
+                                   Value="{Binding FocusDurationMinutes}"
+                                   Minimum="1" Maximum="120" Increment="1"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="Short break (minutes)" VerticalAlignment="Center"/>
+                    <NumericUpDown Grid.Row="1" Grid.Column="1"
+                                   Value="{Binding ShortBreakMinutes}"
+                                   Minimum="1" Maximum="60" Increment="1"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                               Text="Long break (minutes)" VerticalAlignment="Center"/>
+                    <NumericUpDown Grid.Row="2" Grid.Column="1"
+                                   Value="{Binding LongBreakMinutes}"
+                                   Minimum="1" Maximum="60" Increment="1"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0"
+                               Text="Cycles before long break" VerticalAlignment="Center"/>
+                    <NumericUpDown Grid.Row="3" Grid.Column="1"
+                                   Value="{Binding CyclesBeforeLongBreak}"
+                                   Minimum="1" Maximum="10" Increment="1"/>
+
+                </Grid>
+
+            </StackPanel>
+
+            <Separator Margin="0 4"/>
+
+            <!-- Save / Cancel -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="8">
+                <Button Content="Cancel" Command="{Binding CancelCommand}"/>
+                <Button Content="Save"   Command="{Binding SaveCommand}"
+                        Classes="accent"/>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>

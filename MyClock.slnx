@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="MyClock.App/MyClock.App.csproj" />
+  <Project Path="MyClock.Core/MyClock.Core.csproj" />
+  <Project Path="MyClock.Infrastructure/MyClock.Infrastructure.csproj" />
+  <Project Path="MyClock.Tests/MyClock.Tests.csproj" />
+</Solution>
