@@ -4,13 +4,25 @@
         x:Class="MyClock.App.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
         Title="Settings"
-        Width="320" Height="400"
+        Width="360" Height="520"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
-        ShowInTaskbar="False">
+        ShowInTaskbar="False"
+        FontSize="14">
 
-    <ScrollViewer>
-        <StackPanel Margin="20" Spacing="10">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style Selector="NumericUpDown">
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style Selector="ToggleSwitch">
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </Window.Styles>
+
+    <StackPanel Margin="20" Spacing="10">
 
             <!-- Time Format -->
             <TextBlock Text="Time Format" FontWeight="SemiBold"/>
@@ -32,10 +44,10 @@
                           OnContent="Enabled" OffContent="Disabled"/>
 
             <!-- Pomodoro durations — greyed out when Pomodoro is off -->
-            <StackPanel IsEnabled="{Binding PomodoroEnabled}" Spacing="6">
+            <StackPanel IsEnabled="{Binding PomodoroEnabled}" Spacing="8">
 
-                <Grid ColumnDefinitions="*,90" RowDefinitions="Auto,Auto,Auto,Auto"
-                      RowSpacing="6">
+                <Grid ColumnDefinitions="*,110" RowDefinitions="Auto,Auto,Auto,Auto"
+                      RowSpacing="8">
 
                     <TextBlock Grid.Row="0" Grid.Column="0"
                                Text="Focus (minutes)" VerticalAlignment="Center"/>
@@ -71,11 +83,10 @@
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Spacing="8">
-                <Button Content="Cancel" Command="{Binding CancelCommand}"/>
+                <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="14" Padding="12 6"/>
                 <Button Content="Save"   Command="{Binding SaveCommand}"
-                        Classes="accent"/>
+                        Classes="accent" FontSize="14" Padding="12 6"/>
             </StackPanel>
 
-        </StackPanel>
-    </ScrollViewer>
+    </StackPanel>
 </Window>

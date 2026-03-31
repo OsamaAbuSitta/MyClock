@@ -13,6 +13,65 @@
         TransparencyLevelHint="Transparent"
         ExtendClientAreaToDecorationsHint="True">
 
+    <Window.Styles>
+        <!-- Ghost buttons: ⚙ and × -->
+        <Style Selector="Button.ghost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#88FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.ghost:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#AAFFFFFF"/>
+        </Style>
+
+        <!-- Green: Start / Resume -->
+        <Style Selector="Button.green">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.green:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#43A047"/>
+        </Style>
+        <Style Selector="Button.green:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#388E3C"/>
+        </Style>
+
+        <!-- Orange: Pause -->
+        <Style Selector="Button.orange">
+            <Setter Property="Background" Value="#FF9800"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.orange:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#FB8C00"/>
+        </Style>
+        <Style Selector="Button.orange:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#EF6C00"/>
+        </Style>
+
+        <!-- Grey: Reset -->
+        <Style Selector="Button.grey">
+            <Setter Property="Background" Value="#555555"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.grey:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#666666"/>
+        </Style>
+        <Style Selector="Button.grey:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#444444"/>
+        </Style>
+    </Window.Styles>
+
     <Border Name="DragBorder"
             Background="#DD1E1E1E"
             CornerRadius="12"
@@ -32,23 +91,19 @@
                            Foreground="#CCFFFFFF"
                            HorizontalAlignment="Center"/>
                 <Button Grid.Column="1"
+                        Classes="ghost"
                         Content="⚙"
                         Command="{Binding OpenSettingsCommand}"
-                        Background="Transparent"
-                        Foreground="#88FFFFFF"
                         FontSize="12"
                         Padding="2 0"
-                        VerticalAlignment="Top"
-                        BorderThickness="0"/>
+                        VerticalAlignment="Top"/>
                 <Button Grid.Column="2"
+                        Classes="ghost"
                         Content="×"
                         Command="{Binding CloseCommand}"
-                        Background="Transparent"
-                        Foreground="#88FFFFFF"
                         FontSize="14"
                         Padding="2 0"
-                        VerticalAlignment="Top"
-                        BorderThickness="0"/>
+                        VerticalAlignment="Top"/>
             </Grid>
 
             <!-- Row 2: Session timer -->
@@ -69,19 +124,23 @@
                         HorizontalAlignment="Center"
                         Spacing="4"
                         Margin="0 4 0 0">
-                <Button Content="Start"
+                <Button Classes="green"
+                        Content="Start"
                         Command="{Binding StartCommand}"
                         IsVisible="{Binding CanStart}"
                         FontSize="11" Padding="8 3"/>
-                <Button Content="Pause"
+                <Button Classes="orange"
+                        Content="Pause"
                         Command="{Binding PauseCommand}"
                         IsVisible="{Binding CanPause}"
                         FontSize="11" Padding="8 3"/>
-                <Button Content="Resume"
+                <Button Classes="green"
+                        Content="Resume"
                         Command="{Binding ResumeCommand}"
                         IsVisible="{Binding CanResume}"
                         FontSize="11" Padding="8 3"/>
-                <Button Content="Reset"
+                <Button Classes="grey"
+                        Content="Reset"
                         Command="{Binding ResetCommand}"
                         IsVisible="{Binding CanReset}"
                         FontSize="11" Padding="8 3"/>
