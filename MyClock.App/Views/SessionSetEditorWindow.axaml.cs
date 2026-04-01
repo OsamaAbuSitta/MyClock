@@ -6,6 +6,11 @@ namespace MyClock.App.Views;
 
 public partial class SessionSetEditorWindow : Window
 {
+    public SessionSetEditorWindow()
+    {
+        InitializeComponent();
+    }
+
     protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);

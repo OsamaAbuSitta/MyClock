@@ -35,17 +35,17 @@ public partial class App : Application
             {
                 var settingsVm = new SettingsWindowViewModel(settingsService);
 
+                var settingsWindow = new SettingsWindow { DataContext = settingsVm };
+
                 // Register handler for the session set editor interaction
                 settingsVm.OpenEditorInteraction.RegisterHandler(async editorContext =>
                 {
                     var editorVm = new SessionSetEditorViewModel(settingsService);
                     var editorWindow = new SessionSetEditorWindow { DataContext = editorVm };
-                    await editorWindow.ShowDialog(window);
-                    // Reload session sets in the settings VM after editor closes
+                    await editorWindow.ShowDialog(settingsWindow);
                     editorContext.SetOutput(Unit.Default);
                 });
 
-                var settingsWindow = new SettingsWindow { DataContext = settingsVm };
                 await settingsWindow.ShowDialog(window);
 
                 if (settingsVm.Saved)
