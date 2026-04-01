@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - rid: win-x64
+            os: windows-latest
+            artifact: MyClock-win-x64.zip
+          - rid: osx-arm64
+            os: macos-latest
+            artifact: MyClock-osx-arm64.zip
+          - rid: linux-x64
+            os: ubuntu-latest
+            artifact: MyClock-linux-x64.zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish
+        run: >
+          dotnet publish MyClock.App
+          -c Release
+          -r ${{ matrix.rid }}
+          --self-contained true
+          -o ./publish/${{ matrix.rid }}
+
+      - name: Zip (Windows)
+        if: matrix.rid == 'win-x64'
+        shell: pwsh
+        run: Compress-Archive -Path ./publish/${{ matrix.rid }}/* -DestinationPath ${{ matrix.artifact }}
+
+      - name: Zip (macOS / Linux)
+        if: matrix.rid != 'win-x64'
+        run: zip -r ${{ matrix.artifact }} ./publish/${{ matrix.rid }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
