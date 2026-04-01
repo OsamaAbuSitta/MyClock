@@ -147,9 +147,9 @@
                         IsVisible="{Binding CanReset}"
                         FontSize="11" Padding="8 3"/>
                 <Button Classes="green"
-                        Content="{Binding NextPhaseLabel}"
-                        Command="{Binding StartNextCommand}"
-                        IsVisible="{Binding CanStartNext}"
+                        Content="Next"
+                        Command="{Binding GoNextCommand}"
+                        IsVisible="{Binding CanGoNext}"
                         FontSize="11" Padding="8 3"/>
             </StackPanel>
 

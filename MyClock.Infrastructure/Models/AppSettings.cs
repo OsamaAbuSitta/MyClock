@@ -1,3 +1,5 @@
+using MyClock.Core.Models;
+
 namespace MyClock.Infrastructure.Models;
 
 public class AppSettings
@@ -8,12 +10,9 @@ public class AppSettings
     public bool Use24HourFormat { get; set; } = true;
     public bool ShowClock { get; set; } = false;
     public string Theme { get; set; } = "Dark";
-    public int? LastUsedDurationSeconds { get; set; } // null = stopwatch was last used
 
-    // Pomodoro
-    public bool PomodoroEnabled { get; set; } = false;
-    public int FocusDurationMinutes { get; set; } = 25;
-    public int ShortBreakMinutes { get; set; } = 5;
-    public int LongBreakMinutes { get; set; } = 15;
-    public int CyclesBeforeLongBreak { get; set; } = 4;
+    // Timer
+    public TimerMode TimerMode { get; set; } = TimerMode.Free;
+    public string? ActiveSessionSetId { get; set; }
+    public List<SessionSet> SessionSets { get; set; } = new();
 }

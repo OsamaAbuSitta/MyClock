@@ -1,4 +1,8 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive;
+using MyClock.Core.Models;
 using MyClock.Infrastructure.Services;
 using ReactiveUI;
 
@@ -8,7 +12,6 @@ public class SettingsWindowViewModel : ViewModelBase
 {
     private readonly SettingsService _settingsService;
 
-    // Raised when the dialog should close (Save or Cancel)
     public event Action? CloseRequested;
     public bool Saved { get; private set; }
 
@@ -36,80 +39,86 @@ public class SettingsWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _opacity, value);
     }
 
-    // Pomodoro toggle
-    private bool _pomodoroEnabled;
-    public bool PomodoroEnabled
+    // Timer mode
+    private bool _isFreeMode;
+    public bool IsFreeMode
     {
-        get => _pomodoroEnabled;
-        set => this.RaiseAndSetIfChanged(ref _pomodoroEnabled, value);
+        get => _isFreeMode;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isFreeMode, value);
+            if (value) IsSessionSetMode = false;
+        }
     }
 
-    // Duration properties use decimal to match Avalonia NumericUpDown.Value (decimal?)
-    private decimal _focusDurationMinutes;
-    public decimal FocusDurationMinutes
+    private bool _isSessionSetMode;
+    public bool IsSessionSetMode
     {
-        get => _focusDurationMinutes;
-        set => this.RaiseAndSetIfChanged(ref _focusDurationMinutes, value);
+        get => _isSessionSetMode;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isSessionSetMode, value);
+            if (value) IsFreeMode = false;
+        }
     }
 
-    private decimal _shortBreakMinutes;
-    public decimal ShortBreakMinutes
-    {
-        get => _shortBreakMinutes;
-        set => this.RaiseAndSetIfChanged(ref _shortBreakMinutes, value);
-    }
+    // Session sets
+    public ObservableCollection<SessionSet> SessionSets { get; } = new();
 
-    private decimal _longBreakMinutes;
-    public decimal LongBreakMinutes
+    private SessionSet? _selectedSessionSet;
+    public SessionSet? SelectedSessionSet
     {
-        get => _longBreakMinutes;
-        set => this.RaiseAndSetIfChanged(ref _longBreakMinutes, value);
-    }
-
-    private decimal _cyclesBeforeLongBreak;
-    public decimal CyclesBeforeLongBreak
-    {
-        get => _cyclesBeforeLongBreak;
-        set => this.RaiseAndSetIfChanged(ref _cyclesBeforeLongBreak, value);
+        get => _selectedSessionSet;
+        set => this.RaiseAndSetIfChanged(ref _selectedSessionSet, value);
     }
 
     // Commands
-    public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> SaveCommand { get; }
-    public ReactiveCommand<System.Reactive.Unit, System.Reactive.Unit> CancelCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+    public ReactiveCommand<Unit, Unit> CancelCommand { get; }
+    public ReactiveCommand<Unit, Unit> RestoreDefaultsCommand { get; }
+    public ReactiveCommand<Unit, Unit> ManageSetsCommand { get; }
+
+    // Interaction to open the session set editor
+    public Interaction<Unit, Unit> OpenEditorInteraction { get; } = new();
 
     public SettingsWindowViewModel(SettingsService settingsService)
     {
         _settingsService = settingsService;
         LoadFromCurrent();
 
-        SaveCommand   = ReactiveCommand.Create(ExecuteSave);
-        CancelCommand = ReactiveCommand.Create(ExecuteCancel);
+        SaveCommand            = ReactiveCommand.Create(ExecuteSave);
+        CancelCommand          = ReactiveCommand.Create(ExecuteCancel);
+        RestoreDefaultsCommand = ReactiveCommand.Create(ExecuteRestoreDefaults);
+        ManageSetsCommand      = ReactiveCommand.CreateFromObservable(() =>
+            OpenEditorInteraction.Handle(Unit.Default));
     }
 
     private void LoadFromCurrent()
     {
         var s = _settingsService.Current;
-        ShowClock              = s.ShowClock;
-        Use24HourFormat        = s.Use24HourFormat;
-        Opacity                = s.Opacity;
-        PomodoroEnabled        = s.PomodoroEnabled;
-        FocusDurationMinutes   = s.FocusDurationMinutes;
-        ShortBreakMinutes      = s.ShortBreakMinutes;
-        LongBreakMinutes       = s.LongBreakMinutes;
-        CyclesBeforeLongBreak  = s.CyclesBeforeLongBreak;
+        ShowClock       = s.ShowClock;
+        Use24HourFormat = s.Use24HourFormat;
+        Opacity         = s.Opacity;
+        IsFreeMode      = s.TimerMode == TimerMode.Free;
+        IsSessionSetMode = s.TimerMode == TimerMode.SessionSet;
+
+        SessionSets.Clear();
+        foreach (var set in s.SessionSets)
+            SessionSets.Add(set);
+
+        SelectedSessionSet = s.ActiveSessionSetId is not null
+            ? s.SessionSets.FirstOrDefault(x => x.Id == s.ActiveSessionSetId)
+            : s.SessionSets.FirstOrDefault();
     }
 
     private void ExecuteSave()
     {
         var s = _settingsService.Current;
-        s.ShowClock             = ShowClock;
-        s.Use24HourFormat       = Use24HourFormat;
-        s.Opacity               = Opacity;
-        s.PomodoroEnabled       = PomodoroEnabled;
-        s.FocusDurationMinutes  = (int)FocusDurationMinutes;
-        s.ShortBreakMinutes     = (int)ShortBreakMinutes;
-        s.LongBreakMinutes      = (int)LongBreakMinutes;
-        s.CyclesBeforeLongBreak = (int)CyclesBeforeLongBreak;
+        s.ShowClock          = ShowClock;
+        s.Use24HourFormat    = Use24HourFormat;
+        s.Opacity            = Opacity;
+        s.TimerMode          = IsSessionSetMode ? TimerMode.SessionSet : TimerMode.Free;
+        s.ActiveSessionSetId = SelectedSessionSet?.Id;
         _settingsService.Save();
         Saved = true;
         CloseRequested?.Invoke();
@@ -119,5 +128,18 @@ public class SettingsWindowViewModel : ViewModelBase
     {
         Saved = false;
         CloseRequested?.Invoke();
+    }
+
+    private void ExecuteRestoreDefaults()
+    {
+        _settingsService.ResetAllDefaults();
+        // Refresh the list
+        SessionSets.Clear();
+        foreach (var set in _settingsService.Current.SessionSets)
+            SessionSets.Add(set);
+        // Re-select if current selection was a built-in that got restored
+        if (SelectedSessionSet is not null)
+            SelectedSessionSet = SessionSets.FirstOrDefault(x => x.Id == SelectedSessionSet.Id)
+                                 ?? SessionSets.FirstOrDefault();
     }
 }

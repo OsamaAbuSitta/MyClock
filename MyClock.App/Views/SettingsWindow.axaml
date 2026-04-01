@@ -15,9 +15,6 @@
         <Style Selector="TextBlock">
             <Setter Property="FontSize" Value="14"/>
         </Style>
-        <Style Selector="NumericUpDown">
-            <Setter Property="FontSize" Value="14"/>
-        </Style>
         <Style Selector="ToggleSwitch">
             <Setter Property="FontSize" Value="14"/>
         </Style>
@@ -25,75 +22,65 @@
 
     <StackPanel Margin="20" Spacing="10">
 
-            <!-- Clock visibility -->
-            <TextBlock Text="Clock" FontWeight="SemiBold"/>
-            <ToggleSwitch IsChecked="{Binding ShowClock}"
-                          OnContent="Visible" OffContent="Hidden"/>
+        <!-- Clock visibility -->
+        <TextBlock Text="Clock" FontWeight="SemiBold"/>
+        <ToggleSwitch IsChecked="{Binding ShowClock}"
+                      OnContent="Visible" OffContent="Hidden"/>
 
-            <!-- Time Format -->
-            <TextBlock Text="Time Format" FontWeight="SemiBold" Margin="0 4 0 0"/>
-            <ToggleSwitch IsChecked="{Binding Use24HourFormat}"
-                          IsEnabled="{Binding ShowClock}"
-                          OnContent="24-hour" OffContent="12-hour"/>
+        <!-- Time Format -->
+        <TextBlock Text="Time Format" FontWeight="SemiBold" Margin="0 4 0 0"/>
+        <ToggleSwitch IsChecked="{Binding Use24HourFormat}"
+                      IsEnabled="{Binding ShowClock}"
+                      OnContent="24-hour" OffContent="12-hour"/>
 
-            <!-- Opacity -->
-            <TextBlock Text="Widget Opacity" Margin="0 6 0 0"/>
-            <Slider Minimum="0.3" Maximum="1.0"
-                    Value="{Binding Opacity}"
-                    TickFrequency="0.05"
-                    IsSnapToTickEnabled="True"/>
+        <!-- Opacity -->
+        <TextBlock Text="Widget Opacity" Margin="0 6 0 0"/>
+        <Slider Minimum="0.3" Maximum="1.0"
+                Value="{Binding Opacity}"
+                TickFrequency="0.05"
+                IsSnapToTickEnabled="True"/>
 
-            <Separator Margin="0 4"/>
+        <Separator Margin="0 4"/>
 
-            <!-- Pomodoro Enable -->
-            <TextBlock Text="Pomodoro" FontWeight="SemiBold"/>
-            <ToggleSwitch IsChecked="{Binding PomodoroEnabled}"
-                          OnContent="Enabled" OffContent="Disabled"/>
+        <!-- Timer Mode -->
+        <TextBlock Text="Timer Mode" FontWeight="SemiBold"/>
+        <StackPanel Spacing="6">
+            <RadioButton Content="Free Mode"
+                         IsChecked="{Binding IsFreeMode}"
+                         FontSize="14"/>
+            <RadioButton Content="Session Set Mode"
+                         IsChecked="{Binding IsSessionSetMode}"
+                         FontSize="14"/>
+        </StackPanel>
 
-            <!-- Pomodoro durations — greyed out when Pomodoro is off -->
-            <StackPanel IsEnabled="{Binding PomodoroEnabled}" Spacing="8">
-
-                <Grid ColumnDefinitions="*,110" RowDefinitions="Auto,Auto,Auto,Auto"
-                      RowSpacing="8">
-
-                    <TextBlock Grid.Row="0" Grid.Column="0"
-                               Text="Focus (minutes)" VerticalAlignment="Center"/>
-                    <NumericUpDown Grid.Row="0" Grid.Column="1"
-                                   Value="{Binding FocusDurationMinutes}"
-                                   Minimum="1" Maximum="120" Increment="1"/>
-
-                    <TextBlock Grid.Row="1" Grid.Column="0"
-                               Text="Short break (minutes)" VerticalAlignment="Center"/>
-                    <NumericUpDown Grid.Row="1" Grid.Column="1"
-                                   Value="{Binding ShortBreakMinutes}"
-                                   Minimum="1" Maximum="60" Increment="1"/>
-
-                    <TextBlock Grid.Row="2" Grid.Column="0"
-                               Text="Long break (minutes)" VerticalAlignment="Center"/>
-                    <NumericUpDown Grid.Row="2" Grid.Column="1"
-                                   Value="{Binding LongBreakMinutes}"
-                                   Minimum="1" Maximum="60" Increment="1"/>
-
-                    <TextBlock Grid.Row="3" Grid.Column="0"
-                               Text="Cycles before long break" VerticalAlignment="Center"/>
-                    <NumericUpDown Grid.Row="3" Grid.Column="1"
-                                   Value="{Binding CyclesBeforeLongBreak}"
-                                   Minimum="1" Maximum="10" Increment="1"/>
-
-                </Grid>
-
+        <!-- Session Set options (only when Session Set Mode) -->
+        <StackPanel IsVisible="{Binding IsSessionSetMode}" Spacing="8" Margin="0 4 0 0">
+            <TextBlock Text="Active Set" FontWeight="SemiBold"/>
+            <ComboBox ItemsSource="{Binding SessionSets}"
+                      SelectedItem="{Binding SelectedSessionSet}"
+                      DisplayMemberBinding="{Binding Name}"
+                      HorizontalAlignment="Stretch"
+                      FontSize="14"/>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="Manage Sets..."
+                        Command="{Binding ManageSetsCommand}"
+                        FontSize="13" Padding="10 5"/>
+                <Button Content="Restore Defaults"
+                        Command="{Binding RestoreDefaultsCommand}"
+                        FontSize="13" Padding="10 5"/>
             </StackPanel>
+        </StackPanel>
 
-            <Separator Margin="0 4"/>
+        <Separator Margin="0 4"/>
 
-            <!-- Save / Cancel -->
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Spacing="8">
-                <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="14" Padding="12 6"/>
-                <Button Content="Save"   Command="{Binding SaveCommand}"
-                        Classes="accent" FontSize="14" Padding="12 6"/>
-            </StackPanel>
+        <!-- Save / Cancel -->
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="14" Padding="12 6"/>
+            <Button Content="Save"   Command="{Binding SaveCommand}"
+                    Classes="accent" FontSize="14" Padding="12 6"/>
+        </StackPanel>
 
     </StackPanel>
 </Window>

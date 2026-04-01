@@ -1,0 +1,123 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MyClock.App.ViewModels"
+        x:Class="MyClock.App.Views.SessionSetEditorWindow"
+        x:DataType="vm:SessionSetEditorViewModel"
+        Title="Manage Session Sets"
+        Width="620" Height="480"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        FontSize="13">
+
+    <Grid ColumnDefinitions="180,*" Margin="12" ColumnSpacing="12">
+
+        <!-- Left: set list -->
+        <Grid Grid.Column="0" RowDefinitions="*,Auto" RowSpacing="8">
+            <ListBox Grid.Row="0"
+                     ItemsSource="{Binding Sets}"
+                     SelectedItem="{Binding SelectedSet}"
+                     BorderThickness="1"
+                     BorderBrush="#33FFFFFF">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SessionSetViewModel">
+                        <TextBlock Text="{Binding Name}" FontSize="13" Padding="4 2"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6">
+                <Button Content="+ New"
+                        Command="{Binding NewSetCommand}"
+                        FontSize="12" Padding="8 4"/>
+                <Button Content="Delete"
+                        Command="{Binding DeleteSetCommand}"
+                        IsEnabled="{Binding SelectedSet.IsBuiltIn, FallbackValue=False,
+                                    Converter={x:Static BoolConverters.Not}}"
+                        FontSize="12" Padding="8 4"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Right: selected set detail -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto"
+              RowSpacing="8"
+              IsVisible="{Binding SelectedSet, Converter={x:Static ObjectConverters.IsNotNull}}">
+
+            <!-- Set name -->
+            <TextBlock Grid.Row="0" Text="Set Name" FontWeight="SemiBold"/>
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox Grid.Column="0"
+                         Text="{Binding SelectedSet.Name}"
+                         FontSize="13"/>
+                <Button Grid.Column="1"
+                        Content="↺ Restore"
+                        Command="{Binding SelectedSet.RestoreCommand}"
+                        IsVisible="{Binding SelectedSet.IsBuiltIn}"
+                        FontSize="12" Padding="8 4"
+                        ToolTip.Tip="Restore this set to its original default values"/>
+            </Grid>
+
+            <!-- Column headers -->
+            <Grid Grid.Row="2" ColumnDefinitions="*,90,32" Margin="4 0 0 0">
+                <TextBlock Grid.Column="0" Text="Session Name" FontSize="11" Foreground="#88FFFFFF"/>
+                <TextBlock Grid.Column="1" Text="Minutes"      FontSize="11" Foreground="#88FFFFFF" HorizontalAlignment="Center"/>
+            </Grid>
+
+            <!-- Sessions list -->
+            <ListBox Grid.Row="3"
+                     x:Name="SessionsList"
+                     ItemsSource="{Binding SelectedSet.Sessions}"
+                     BorderThickness="1"
+                     BorderBrush="#33FFFFFF"
+                     Padding="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SessionItemViewModel">
+                        <Grid ColumnDefinitions="*,90,32" Margin="2 2">
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding Name}"
+                                     FontSize="12"
+                                     Padding="4 2"
+                                     BorderThickness="0"
+                                     Background="Transparent"/>
+                            <NumericUpDown Grid.Column="1"
+                                           Value="{Binding DurationMinutes}"
+                                           Minimum="1" Maximum="240" Increment="1"
+                                           FontSize="12"
+                                           BorderThickness="0"
+                                           Padding="2 0"
+                                           ShowButtonSpinner="True"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Row controls -->
+            <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="6">
+                <Button Content="+ Add"
+                        Command="{Binding SelectedSet.AddSessionCommand}"
+                        FontSize="12" Padding="8 4"/>
+                <Button Content="Remove"
+                        Command="{Binding SelectedSet.RemoveSessionCommand}"
+                        CommandParameter="{Binding #SessionsList.SelectedItem}"
+                        FontSize="12" Padding="8 4"/>
+                <Button Content="↑"
+                        Command="{Binding SelectedSet.MoveUpCommand}"
+                        CommandParameter="{Binding #SessionsList.SelectedItem}"
+                        FontSize="12" Padding="8 4" Width="32"/>
+                <Button Content="↓"
+                        Command="{Binding SelectedSet.MoveDownCommand}"
+                        CommandParameter="{Binding #SessionsList.SelectedItem}"
+                        FontSize="12" Padding="8 4" Width="32"/>
+            </StackPanel>
+
+            <!-- Save / Cancel -->
+            <StackPanel Grid.Row="5" Orientation="Horizontal"
+                        HorizontalAlignment="Right" Spacing="8">
+                <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="13" Padding="12 6"/>
+                <Button Content="Save"   Command="{Binding SaveCommand}"
+                        Classes="accent" FontSize="13" Padding="12 6"/>
+            </StackPanel>
+
+        </Grid>
+
+    </Grid>
+</Window>
