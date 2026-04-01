@@ -4,117 +4,195 @@
         x:Class="MyClock.App.Views.SessionSetEditorWindow"
         x:DataType="vm:SessionSetEditorViewModel"
         Title="Manage Session Sets"
-        Width="620" Height="480"
+        Width="640" Height="500"
         CanResize="False"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="False"
-        FontSize="13">
+        Background="#1A1A28"
+        RequestedThemeVariant="Dark">
 
-    <Grid ColumnDefinitions="180,*" Margin="12" ColumnSpacing="12">
+    <Window.Styles>
+        <Style Selector="TextBlock.sectionLabel">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#6655AACC"/>
+            <Setter Property="Margin" Value="0 0 0 6"/>
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="10 7"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <!-- Dim Delete button when built-in -->
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#3A1A1A"/>
+            <Setter Property="Foreground" Value="#CC6666"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="8 4"/>
+        </Style>
+        <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4A1A1A"/>
+        </Style>
+        <Style Selector="Button.danger:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="#221515"/>
+            <Setter Property="Foreground" Value="#443333"/>
+        </Style>
+        <Style Selector="Button.icon">
+            <Setter Property="Background" Value="#252538"/>
+            <Setter Property="Foreground" Value="#8888BB"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="6 3"/>
+            <Setter Property="Width" Value="30"/>
+        </Style>
+        <Style Selector="Button.icon:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#32324A"/>
+        </Style>
+        <Style Selector="Button.icon:disabled /template/ ContentPresenter">
+            <Setter Property="Foreground" Value="#44446A"/>
+        </Style>
+    </Window.Styles>
 
-        <!-- Left: set list -->
-        <Grid Grid.Column="0" RowDefinitions="*,Auto" RowSpacing="8">
-            <ListBox Grid.Row="0"
-                     ItemsSource="{Binding Sets}"
-                     SelectedItem="{Binding SelectedSet}"
-                     BorderThickness="1"
-                     BorderBrush="#33FFFFFF">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="vm:SessionSetViewModel">
-                        <TextBlock Text="{Binding Name}" FontSize="13" Padding="4 2"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6">
+    <Grid ColumnDefinitions="195,*" Margin="14" ColumnSpacing="12">
+
+        <!-- ── Left: set list ───────────────────────────────── -->
+        <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto" RowSpacing="8">
+
+            <TextBlock Grid.Row="0" Classes="sectionLabel" Text="SESSION SETS"/>
+
+            <Border Grid.Row="1"
+                    Background="#1F1F30"
+                    CornerRadius="8"
+                    Padding="4"
+                    ClipToBounds="True">
+                <ListBox ItemsSource="{Binding Sets}"
+                         SelectedItem="{Binding SelectedSet}"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SessionSetViewModel">
+                            <StackPanel Spacing="1">
+                                <TextBlock Text="{Binding Name}" FontSize="13"/>
+                                <TextBlock Text="Built-in"
+                                           FontSize="10"
+                                           Foreground="#55557A"
+                                           IsVisible="{Binding IsBuiltIn}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6">
                 <Button Content="+ New"
                         Command="{Binding NewSetCommand}"
-                        FontSize="12" Padding="8 4"/>
-                <Button Content="Delete"
+                        FontSize="12" Padding="10 5"
+                        CornerRadius="6"/>
+                <Button Classes="danger"
+                        Content="Delete"
                         Command="{Binding DeleteSetCommand}"
                         IsEnabled="{Binding SelectedSet.IsBuiltIn, FallbackValue=False,
-                                    Converter={x:Static BoolConverters.Not}}"
-                        FontSize="12" Padding="8 4"/>
+                                    Converter={x:Static BoolConverters.Not}}"/>
             </StackPanel>
+
         </Grid>
 
-        <!-- Right: selected set detail -->
-        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto"
+        <!-- ── Right: set detail ────────────────────────────── -->
+        <Grid Grid.Column="1"
+              RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto"
               RowSpacing="8"
               IsVisible="{Binding SelectedSet, Converter={x:Static ObjectConverters.IsNotNull}}">
 
-            <!-- Set name -->
-            <TextBlock Grid.Row="0" Text="Set Name" FontWeight="SemiBold"/>
+            <TextBlock Grid.Row="0" Classes="sectionLabel" Text="SET DETAILS"/>
+
+            <!-- Name row -->
             <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <TextBox Grid.Column="0"
                          Text="{Binding SelectedSet.Name}"
-                         FontSize="13"/>
+                         FontSize="13"
+                         Watermark="Set name…"
+                         CornerRadius="6"/>
                 <Button Grid.Column="1"
                         Content="↺ Restore"
                         Command="{Binding SelectedSet.RestoreCommand}"
                         IsVisible="{Binding SelectedSet.IsBuiltIn}"
-                        FontSize="12" Padding="8 4"
-                        ToolTip.Tip="Restore this set to its original default values"/>
+                        FontSize="12" Padding="8 5"
+                        CornerRadius="6"
+                        ToolTip.Tip="Restore to original default values"/>
             </Grid>
 
             <!-- Column headers -->
-            <Grid Grid.Row="2" ColumnDefinitions="*,90,32" Margin="4 0 0 0">
-                <TextBlock Grid.Column="0" Text="Session Name" FontSize="11" Foreground="#88FFFFFF"/>
-                <TextBlock Grid.Column="1" Text="Minutes"      FontSize="11" Foreground="#88FFFFFF" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Row="2" Classes="sectionLabel" Text="SESSIONS" Margin="4 4 0 0"/>
+
+            <!-- Header labels -->
+            <Grid Grid.Row="3" ColumnDefinitions="*,80" Margin="10 0 4 0">
+                <TextBlock Grid.Column="0" Text="Name"    FontSize="11" Foreground="#44446A"/>
+                <TextBlock Grid.Column="1" Text="Min"     FontSize="11" Foreground="#44446A" HorizontalAlignment="Center"/>
             </Grid>
 
             <!-- Sessions list -->
-            <ListBox Grid.Row="3"
-                     x:Name="SessionsList"
-                     ItemsSource="{Binding SelectedSet.Sessions}"
-                     BorderThickness="1"
-                     BorderBrush="#33FFFFFF"
-                     Padding="0">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="vm:SessionItemViewModel">
-                        <Grid ColumnDefinitions="*,90,32" Margin="2 2">
-                            <TextBox Grid.Column="0"
-                                     Text="{Binding Name}"
-                                     FontSize="12"
-                                     Padding="4 2"
-                                     BorderThickness="0"
-                                     Background="Transparent"/>
-                            <NumericUpDown Grid.Column="1"
-                                           Value="{Binding DurationMinutes}"
-                                           Minimum="1" Maximum="240" Increment="1"
-                                           FontSize="12"
-                                           BorderThickness="0"
-                                           Padding="2 0"
-                                           ShowButtonSpinner="True"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <Border Grid.Row="4"
+                    Background="#1F1F30"
+                    CornerRadius="8"
+                    Padding="4"
+                    ClipToBounds="True">
+                <ListBox x:Name="SessionsList"
+                         ItemsSource="{Binding SelectedSet.Sessions}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SessionItemViewModel">
+                            <Grid ColumnDefinitions="*,80" Margin="0 1">
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding Name}"
+                                         FontSize="12"
+                                         Padding="6 3"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         CornerRadius="4"/>
+                                <NumericUpDown Grid.Column="1"
+                                               Value="{Binding DurationMinutes}"
+                                               Minimum="1" Maximum="240" Increment="1"
+                                               FontSize="12"
+                                               BorderThickness="0"
+                                               Padding="4 0"
+                                               ShowButtonSpinner="True"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
 
-            <!-- Row controls -->
-            <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="6">
+            <!-- Session row actions -->
+            <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="6">
                 <Button Content="+ Add"
                         Command="{Binding SelectedSet.AddSessionCommand}"
-                        FontSize="12" Padding="8 4"/>
+                        FontSize="12" Padding="10 4" CornerRadius="6"/>
                 <Button Content="Remove"
                         Command="{Binding SelectedSet.RemoveSessionCommand}"
                         CommandParameter="{Binding #SessionsList.SelectedItem}"
-                        FontSize="12" Padding="8 4"/>
-                <Button Content="↑"
+                        FontSize="12" Padding="10 4" CornerRadius="6"/>
+                <Button Classes="icon" Content="↑"
                         Command="{Binding SelectedSet.MoveUpCommand}"
-                        CommandParameter="{Binding #SessionsList.SelectedItem}"
-                        FontSize="12" Padding="8 4" Width="32"/>
-                <Button Content="↓"
+                        CommandParameter="{Binding #SessionsList.SelectedItem}"/>
+                <Button Classes="icon" Content="↓"
                         Command="{Binding SelectedSet.MoveDownCommand}"
-                        CommandParameter="{Binding #SessionsList.SelectedItem}"
-                        FontSize="12" Padding="8 4" Width="32"/>
+                        CommandParameter="{Binding #SessionsList.SelectedItem}"/>
             </StackPanel>
 
             <!-- Save / Cancel -->
-            <StackPanel Grid.Row="5" Orientation="Horizontal"
+            <StackPanel Grid.Row="6" Orientation="Horizontal"
                         HorizontalAlignment="Right" Spacing="8">
-                <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="13" Padding="12 6"/>
-                <Button Content="Save"   Command="{Binding SaveCommand}"
-                        Classes="accent" FontSize="13" Padding="12 6"/>
+                <Button Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        FontSize="13" Padding="14 6" CornerRadius="6"/>
+                <Button Content="Save"
+                        Command="{Binding SaveCommand}"
+                        Classes="accent"
+                        FontSize="13" Padding="14 6" CornerRadius="6"/>
             </StackPanel>
 
         </Grid>

@@ -9,77 +9,119 @@
         CanResize="False"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="False"
-        FontSize="14">
+        Background="#1A1A28"
+        RequestedThemeVariant="Dark">
 
     <Window.Styles>
-        <Style Selector="TextBlock">
-            <Setter Property="FontSize" Value="14"/>
+        <Style Selector="TextBlock.sectionLabel">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#6655AACC"/>
+            <Setter Property="Margin" Value="0 0 0 6"/>
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#BBBBDD"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         <Style Selector="ToggleSwitch">
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="13"/>
         </Style>
     </Window.Styles>
 
-    <StackPanel Margin="20" Spacing="10">
+    <StackPanel Margin="16" Spacing="8">
 
-        <!-- Clock visibility -->
-        <TextBlock Text="Clock" FontWeight="SemiBold"/>
-        <ToggleSwitch IsChecked="{Binding ShowClock}"
-                      OnContent="Visible" OffContent="Hidden"/>
+        <!-- ── Display ─────────────────────────────────────── -->
+        <TextBlock Classes="sectionLabel" Text="DISPLAY"/>
+        <Border Background="#1F1F30" CornerRadius="8" Padding="14 10">
+            <StackPanel Spacing="10">
 
-        <!-- Time Format -->
-        <TextBlock Text="Time Format" FontWeight="SemiBold" Margin="0 4 0 0"/>
-        <ToggleSwitch IsChecked="{Binding Use24HourFormat}"
-                      IsEnabled="{Binding ShowClock}"
-                      OnContent="24-hour" OffContent="12-hour"/>
+                <!-- Clock visible -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="label" Grid.Column="0" Text="Show clock"/>
+                    <ToggleSwitch Grid.Column="1"
+                                  IsChecked="{Binding ShowClock}"
+                                  OnContent="On" OffContent="Off"
+                                  HorizontalAlignment="Right"/>
+                </Grid>
 
-        <!-- Opacity -->
-        <TextBlock Text="Widget Opacity" Margin="0 6 0 0"/>
-        <Slider Minimum="0.3" Maximum="1.0"
-                Value="{Binding Opacity}"
-                TickFrequency="0.05"
-                IsSnapToTickEnabled="True"/>
+                <!-- Time format -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="label" Grid.Column="0"
+                               Text="Time format"
+                               Opacity="{Binding ShowClock, Converter={x:Static BoolConverters.Not}, ConverterParameter=0.4, FallbackValue=1}"/>
+                    <ToggleSwitch Grid.Column="1"
+                                  IsChecked="{Binding Use24HourFormat}"
+                                  IsEnabled="{Binding ShowClock}"
+                                  OnContent="24h" OffContent="12h"
+                                  HorizontalAlignment="Right"/>
+                </Grid>
 
-        <Separator Margin="0 4"/>
+                <!-- Opacity -->
+                <StackPanel Spacing="4">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Classes="label" Grid.Column="0" Text="Widget opacity"/>
+                        <TextBlock Grid.Column="1"
+                                   FontSize="12"
+                                   Foreground="#6666AA"
+                                   Text="{Binding Opacity, StringFormat='{}{0:P0}'}"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                    <Slider Minimum="0.3" Maximum="1.0"
+                            Value="{Binding Opacity}"
+                            TickFrequency="0.05"
+                            IsSnapToTickEnabled="True"/>
+                </StackPanel>
 
-        <!-- Timer Mode -->
-        <TextBlock Text="Timer Mode" FontWeight="SemiBold"/>
-        <StackPanel Spacing="6">
-            <RadioButton Content="Free Mode"
-                         IsChecked="{Binding IsFreeMode}"
-                         FontSize="14"/>
-            <RadioButton Content="Session Set Mode"
-                         IsChecked="{Binding IsSessionSetMode}"
-                         FontSize="14"/>
-        </StackPanel>
-
-        <!-- Session Set options (only when Session Set Mode) -->
-        <StackPanel IsVisible="{Binding IsSessionSetMode}" Spacing="8" Margin="0 4 0 0">
-            <TextBlock Text="Active Set" FontWeight="SemiBold"/>
-            <ComboBox ItemsSource="{Binding SessionSets}"
-                      SelectedItem="{Binding SelectedSessionSet}"
-                      DisplayMemberBinding="{Binding Name}"
-                      HorizontalAlignment="Stretch"
-                      FontSize="14"/>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button Content="Manage Sets..."
-                        Command="{Binding ManageSetsCommand}"
-                        FontSize="13" Padding="10 5"/>
-                <Button Content="Restore Defaults"
-                        Command="{Binding RestoreDefaultsCommand}"
-                        FontSize="13" Padding="10 5"/>
             </StackPanel>
-        </StackPanel>
+        </Border>
 
-        <Separator Margin="0 4"/>
+        <!-- ── Timer Mode ─────────────────────────────────── -->
+        <TextBlock Classes="sectionLabel" Text="TIMER MODE" Margin="0 6 0 6"/>
+        <Border Background="#1F1F30" CornerRadius="8" Padding="14 10">
+            <StackPanel Spacing="8">
+                <RadioButton Content="Free Mode"
+                             IsChecked="{Binding IsFreeMode}"
+                             FontSize="13"/>
+                <RadioButton Content="Session Set Mode"
+                             IsChecked="{Binding IsSessionSetMode}"
+                             FontSize="13"/>
+            </StackPanel>
+        </Border>
 
-        <!-- Save / Cancel -->
+        <!-- ── Session Set ────────────────────────────────── -->
+        <Border Background="#1F1F30" CornerRadius="8" Padding="14 10"
+                IsVisible="{Binding IsSessionSetMode}">
+            <StackPanel Spacing="10">
+                <TextBlock Classes="sectionLabel" Text="ACTIVE SET" Margin="0"/>
+                <ComboBox ItemsSource="{Binding SessionSets}"
+                          SelectedItem="{Binding SelectedSessionSet}"
+                          DisplayMemberBinding="{Binding Name}"
+                          HorizontalAlignment="Stretch"
+                          FontSize="13"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Manage Sets…"
+                            Command="{Binding ManageSetsCommand}"
+                            FontSize="12" Padding="10 5"/>
+                    <Button Content="Restore Defaults"
+                            Command="{Binding RestoreDefaultsCommand}"
+                            FontSize="12" Padding="10 5"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Actions ───────────────────────────────────── -->
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right"
-                    Spacing="8">
-            <Button Content="Cancel" Command="{Binding CancelCommand}" FontSize="14" Padding="12 6"/>
-            <Button Content="Save"   Command="{Binding SaveCommand}"
-                    Classes="accent" FontSize="14" Padding="12 6"/>
+                    Spacing="8"
+                    Margin="0 8 0 0">
+            <Button Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    FontSize="13" Padding="14 7"/>
+            <Button Content="Save"
+                    Command="{Binding SaveCommand}"
+                    Classes="accent"
+                    FontSize="13" Padding="14 7"/>
         </StackPanel>
 
     </StackPanel>
