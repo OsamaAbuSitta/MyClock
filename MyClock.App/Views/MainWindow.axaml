@@ -3,9 +3,9 @@
         xmlns:vm="using:MyClock.App.ViewModels"
         x:Class="MyClock.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="230" Height="180"
-        MinWidth="230" MinHeight="180"
-        MaxWidth="230" MaxHeight="180"
+        Width="220" Height="160"
+        MinWidth="220" MinHeight="160"
+        MaxWidth="220" MaxHeight="160"
         Icon="avares://MyClock.App/Assets/app-icon.png"
         CanResize="False"
         Topmost="True"
@@ -15,157 +15,146 @@
         ExtendClientAreaToDecorationsHint="True">
 
     <Window.Styles>
-        <!-- Ghost: ⚙ × -->
+        <!-- Ghost buttons: ⚙ and × -->
         <Style Selector="Button.ghost">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#55667799"/>
+            <Setter Property="Foreground" Value="#88FFFFFF"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="4 2"/>
-            <Setter Property="CornerRadius" Value="4"/>
         </Style>
         <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#22FFFFFF"/>
-            <Setter Property="Foreground" Value="#CCDDEEFF"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
         </Style>
         <Style Selector="Button.ghost:pressed /template/ ContentPresenter">
-            <Setter Property="Background" Value="#11FFFFFF"/>
-        </Style>
-
-        <!-- Shared pill base -->
-        <Style Selector="Button.pill">
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Padding" Value="10 4"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#AAFFFFFF"/>
         </Style>
 
         <!-- Green: Start / Resume / Next -->
         <Style Selector="Button.green">
-            <Setter Property="Background" Value="#4ADE80"/>
-            <Setter Property="Foreground" Value="#0A1A0F"/>
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
         <Style Selector="Button.green:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#22DD66"/>
+            <Setter Property="Background" Value="#43A047"/>
         </Style>
         <Style Selector="Button.green:pressed /template/ ContentPresenter">
-            <Setter Property="Background" Value="#16A34A"/>
+            <Setter Property="Background" Value="#388E3C"/>
         </Style>
 
         <!-- Orange: Pause -->
         <Style Selector="Button.orange">
-            <Setter Property="Background" Value="#FB923C"/>
-            <Setter Property="Foreground" Value="#1A0C00"/>
+            <Setter Property="Background" Value="#FF9800"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
         <Style Selector="Button.orange:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#F97316"/>
+            <Setter Property="Background" Value="#FB8C00"/>
         </Style>
         <Style Selector="Button.orange:pressed /template/ ContentPresenter">
-            <Setter Property="Background" Value="#EA6C10"/>
+            <Setter Property="Background" Value="#EF6C00"/>
         </Style>
 
         <!-- Grey: Reset -->
         <Style Selector="Button.grey">
-            <Setter Property="Background" Value="#2E2E42"/>
-            <Setter Property="Foreground" Value="#9999BB"/>
+            <Setter Property="Background" Value="#555555"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
         <Style Selector="Button.grey:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#3A3A52"/>
+            <Setter Property="Background" Value="#666666"/>
         </Style>
         <Style Selector="Button.grey:pressed /template/ ContentPresenter">
-            <Setter Property="Background" Value="#252538"/>
+            <Setter Property="Background" Value="#444444"/>
         </Style>
     </Window.Styles>
 
-    <!-- Outer shell: clipped rounded card -->
-    <Border CornerRadius="14"
-            ClipToBounds="True"
+    <Border Name="DragBorder"
+            Background="#DD1E1E1E"
+            CornerRadius="12"
+            Padding="12 8"
             PointerPressed="OnDragBorderPressed"
             PointerMoved="OnDragBorderMoved"
             PointerReleased="OnDragBorderReleased">
 
-        <Grid RowDefinitions="3,*">
+        <StackPanel Spacing="4">
 
-            <!-- Accent bar -->
-            <Border Grid.Row="0" Background="#6C5CE7"/>
+            <!-- Row 1: Current time + settings + close buttons -->
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding CurrentTimeDisplay}"
+                           IsVisible="{Binding ShowClock}"
+                           FontSize="18"
+                           FontWeight="Light"
+                           Foreground="#CCFFFFFF"
+                           HorizontalAlignment="Center"/>
+                <Button Grid.Column="1"
+                        Classes="ghost"
+                        Content="⚙"
+                        Command="{Binding OpenSettingsCommand}"
+                        FontSize="12"
+                        Padding="2 0"
+                        VerticalAlignment="Top"/>
+                <Button Grid.Column="2"
+                        Classes="ghost"
+                        Content="×"
+                        Command="{Binding CloseCommand}"
+                        FontSize="14"
+                        Padding="2 0"
+                        VerticalAlignment="Top"/>
+            </Grid>
 
-            <!-- Main body -->
-            <Border Grid.Row="1"
-                    Background="#EE141420">
+            <!-- Row 2: Session timer -->
+            <TextBlock Text="{Binding SessionTimeDisplay}"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Center"/>
 
-                <StackPanel Margin="12 6 12 10" Spacing="2">
+            <!-- Row 3: Session name / status -->
+            <TextBlock Text="{Binding SessionStatusDisplay}"
+                       FontSize="10"
+                       Foreground="#88FFFFFF"
+                       HorizontalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="196"/>
 
-                    <!-- Row 1: clock + icon buttons -->
-                    <Grid ColumnDefinitions="*,Auto,Auto">
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding CurrentTimeDisplay}"
-                                   IsVisible="{Binding ShowClock}"
-                                   FontSize="15"
-                                   FontWeight="Light"
-                                   Foreground="#6677AACC"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Left"/>
-                        <Button Grid.Column="1"
-                                Classes="ghost"
-                                Content="⚙"
-                                Command="{Binding OpenSettingsCommand}"
-                                FontSize="13"
-                                VerticalAlignment="Center"/>
-                        <Button Grid.Column="2"
-                                Classes="ghost"
-                                Content="✕"
-                                Command="{Binding CloseCommand}"
-                                FontSize="11"
-                                VerticalAlignment="Center"/>
-                    </Grid>
+            <!-- Row 4: Control buttons -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Spacing="4"
+                        Margin="0 4 0 0">
+                <Button Classes="green"
+                        Content="Start"
+                        Command="{Binding StartCommand}"
+                        IsVisible="{Binding CanStart}"
+                        FontSize="11" Padding="8 3"/>
+                <Button Classes="orange"
+                        Content="Pause"
+                        Command="{Binding PauseCommand}"
+                        IsVisible="{Binding CanPause}"
+                        FontSize="11" Padding="8 3"/>
+                <Button Classes="green"
+                        Content="Resume"
+                        Command="{Binding ResumeCommand}"
+                        IsVisible="{Binding CanResume}"
+                        FontSize="11" Padding="8 3"/>
+                <Button Classes="grey"
+                        Content="Reset"
+                        Command="{Binding ResetCommand}"
+                        IsVisible="{Binding CanReset}"
+                        FontSize="11" Padding="8 3"/>
+                <Button Classes="green"
+                        Content="Next"
+                        Command="{Binding GoNextCommand}"
+                        IsVisible="{Binding CanGoNext}"
+                        FontSize="11" Padding="8 3"/>
+            </StackPanel>
 
-                    <!-- Row 2: timer -->
-                    <TextBlock Text="{Binding SessionTimeDisplay}"
-                               FontSize="44"
-                               FontWeight="Bold"
-                               Foreground="#F0F0FF"
-                               HorizontalAlignment="Center"
-                               LetterSpacing="-1"
-                               Margin="0 2 0 0"/>
-
-                    <!-- Row 3: status -->
-                    <TextBlock Text="{Binding SessionStatusDisplay}"
-                               FontSize="10"
-                               Foreground="#5566889A"
-                               HorizontalAlignment="Center"
-                               TextTrimming="CharacterEllipsis"
-                               MaxWidth="210"/>
-
-                    <!-- Row 4: buttons -->
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Spacing="5"
-                                Margin="0 6 0 0">
-                        <Button Classes="pill green"
-                                Content="Start"
-                                Command="{Binding StartCommand}"
-                                IsVisible="{Binding CanStart}"/>
-                        <Button Classes="pill orange"
-                                Content="Pause"
-                                Command="{Binding PauseCommand}"
-                                IsVisible="{Binding CanPause}"/>
-                        <Button Classes="pill green"
-                                Content="Resume"
-                                Command="{Binding ResumeCommand}"
-                                IsVisible="{Binding CanResume}"/>
-                        <Button Classes="pill grey"
-                                Content="Reset"
-                                Command="{Binding ResetCommand}"
-                                IsVisible="{Binding CanReset}"/>
-                        <Button Classes="pill green"
-                                Content="Next ›"
-                                Command="{Binding GoNextCommand}"
-                                IsVisible="{Binding CanGoNext}"/>
-                    </StackPanel>
-
-                </StackPanel>
-            </Border>
-        </Grid>
+        </StackPanel>
     </Border>
 </Window>
