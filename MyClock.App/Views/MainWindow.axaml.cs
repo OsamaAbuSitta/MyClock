@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -7,9 +8,10 @@ namespace MyClock.App.Views;
 
 public partial class MainWindow : Window
 {
-    // Fixed offset of the pointer within the window at the moment drag started
     private Point _pointerOffset;
     private bool _isDragging;
+    private bool _dragThresholdReached;
+    private const double DragThreshold = 4; // pixels before drag activates
 
     public MainWindow()
     {
@@ -20,7 +22,7 @@ public partial class MainWindow : Window
     {
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
         _isDragging = true;
-        // Record how far the pointer is from the window's top-left corner
+        _dragThresholdReached = false;
         _pointerOffset = e.GetPosition(this);
         e.Pointer.Capture((IInputElement)sender!);
     }
@@ -28,9 +30,20 @@ public partial class MainWindow : Window
     private void OnDragBorderMoved(object? sender, PointerEventArgs e)
     {
         if (!_isDragging) return;
-        // Convert current pointer position to screen coordinates, then subtract
-        // the fixed offset so the window top-left follows the pointer correctly
-        var pointerOnScreen = ((IRenderRoot)this).PointToScreen(e.GetPosition(this));
+
+        var currentPos = e.GetPosition(this);
+
+        // Don't move until the pointer has travelled past the threshold —
+        // this prevents a plain click from nudging the window position.
+        if (!_dragThresholdReached)
+        {
+            var delta = currentPos - _pointerOffset;
+            if (Math.Abs(delta.X) < DragThreshold && Math.Abs(delta.Y) < DragThreshold)
+                return;
+            _dragThresholdReached = true;
+        }
+
+        var pointerOnScreen = ((IRenderRoot)this).PointToScreen(currentPos);
         Position = new PixelPoint(
             pointerOnScreen.X - (int)_pointerOffset.X,
             pointerOnScreen.Y - (int)_pointerOffset.Y);
@@ -39,6 +52,7 @@ public partial class MainWindow : Window
     private void OnDragBorderReleased(object? sender, PointerReleasedEventArgs e)
     {
         _isDragging = false;
+        _dragThresholdReached = false;
         e.Pointer.Capture(null);
     }
 }

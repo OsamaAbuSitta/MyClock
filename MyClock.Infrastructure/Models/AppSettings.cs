@@ -6,6 +6,7 @@ public class AppSettings
     public double WindowY { get; set; } = 100;
     public double Opacity { get; set; } = 0.92;
     public bool Use24HourFormat { get; set; } = true;
+    public bool ShowClock { get; set; } = false;
     public string Theme { get; set; } = "Dark";
     public int? LastUsedDurationSeconds { get; set; } // null = stopwatch was last used
 

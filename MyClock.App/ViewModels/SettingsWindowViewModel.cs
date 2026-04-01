@@ -12,6 +12,14 @@ public class SettingsWindowViewModel : ViewModelBase
     public event Action? CloseRequested;
     public bool Saved { get; private set; }
 
+    // Clock visibility
+    private bool _showClock;
+    public bool ShowClock
+    {
+        get => _showClock;
+        set => this.RaiseAndSetIfChanged(ref _showClock, value);
+    }
+
     // Time format
     private bool _use24HourFormat;
     public bool Use24HourFormat
@@ -81,6 +89,7 @@ public class SettingsWindowViewModel : ViewModelBase
     private void LoadFromCurrent()
     {
         var s = _settingsService.Current;
+        ShowClock              = s.ShowClock;
         Use24HourFormat        = s.Use24HourFormat;
         Opacity                = s.Opacity;
         PomodoroEnabled        = s.PomodoroEnabled;
@@ -93,6 +102,7 @@ public class SettingsWindowViewModel : ViewModelBase
     private void ExecuteSave()
     {
         var s = _settingsService.Current;
+        s.ShowClock             = ShowClock;
         s.Use24HourFormat       = Use24HourFormat;
         s.Opacity               = Opacity;
         s.PomodoroEnabled       = PomodoroEnabled;

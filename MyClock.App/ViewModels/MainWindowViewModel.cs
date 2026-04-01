@@ -74,6 +74,13 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         private set => this.RaiseAndSetIfChanged(ref _canReset, value);
     }
 
+    private bool _showClock = true;
+    public bool ShowClock
+    {
+        get => _showClock;
+        private set => this.RaiseAndSetIfChanged(ref _showClock, value);
+    }
+
     // --- Commands ---
     public ReactiveCommand<Unit, Unit> StartCommand { get; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; }
@@ -97,6 +104,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         _notification = notification;
 
         _use24Hour = settings.Current.Use24HourFormat;
+        _showClock = settings.Current.ShowClock;
 
         // Clock ticks → CurrentTimeDisplay
         _disposables.Add(_clock.CurrentTime
@@ -246,6 +254,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     public void OnSettingsSaved()
     {
         _use24Hour = _settings.Current.Use24HourFormat;
+        ShowClock  = _settings.Current.ShowClock;
         // Opacity is applied to the window directly by App.axaml.cs
     }
 

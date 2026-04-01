@@ -24,9 +24,15 @@
 
     <StackPanel Margin="20" Spacing="10">
 
+            <!-- Clock visibility -->
+            <TextBlock Text="Clock" FontWeight="SemiBold"/>
+            <ToggleSwitch IsChecked="{Binding ShowClock}"
+                          OnContent="Visible" OffContent="Hidden"/>
+
             <!-- Time Format -->
-            <TextBlock Text="Time Format" FontWeight="SemiBold"/>
+            <TextBlock Text="Time Format" FontWeight="SemiBold" Margin="0 4 0 0"/>
             <ToggleSwitch IsChecked="{Binding Use24HourFormat}"
+                          IsEnabled="{Binding ShowClock}"
                           OnContent="24-hour" OffContent="12-hour"/>
 
             <!-- Opacity -->
