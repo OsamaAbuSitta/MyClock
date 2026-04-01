@@ -6,6 +6,7 @@
         Width="220" Height="160"
         MinWidth="220" MinHeight="160"
         MaxWidth="220" MaxHeight="160"
+        Icon="avares://MyClock.App/Assets/app-icon.png"
         CanResize="False"
         Topmost="True"
         SystemDecorations="None"
