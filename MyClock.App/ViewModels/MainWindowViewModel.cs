@@ -21,8 +21,10 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
     // Pomodoro state
     private bool _use24Hour;
     private PomodoroPhase _currentPhase = PomodoroPhase.Focus;
+    private PomodoroPhase _nextPhase = PomodoroPhase.Focus;
     private int _completedCycles = 0;
     private bool _pomodoroActive = false;
+    private bool _waitingForNext = false;
 
     // --- Bindable properties ---
     private string _currentTimeDisplay = "--:--:--";
@@ -81,11 +83,26 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
         private set => this.RaiseAndSetIfChanged(ref _showClock, value);
     }
 
+    private bool _canStartNext;
+    public bool CanStartNext
+    {
+        get => _canStartNext;
+        private set => this.RaiseAndSetIfChanged(ref _canStartNext, value);
+    }
+
+    private string _nextPhaseLabel = "Next";
+    public string NextPhaseLabel
+    {
+        get => _nextPhaseLabel;
+        private set => this.RaiseAndSetIfChanged(ref _nextPhaseLabel, value);
+    }
+
     // --- Commands ---
     public ReactiveCommand<Unit, Unit> StartCommand { get; }
     public ReactiveCommand<Unit, Unit> PauseCommand { get; }
     public ReactiveCommand<Unit, Unit> ResumeCommand { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+    public ReactiveCommand<Unit, Unit> StartNextCommand { get; }
     public ReactiveCommand<Unit, Unit> CloseCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenSettingsCommand { get; }
 
@@ -121,17 +138,29 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(UpdateSessionDisplay));
 
-        // Session completed → notification + Pomodoro advance
+        // Session completed → notification + Pomodoro waiting state
         _disposables.Add(_session.SessionCompleted
             .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(s =>
             {
-                _notification.ShowSessionCompleted(s.Name);
                 _notification.PlayAlert();
                 UpdateSessionDisplay(s);
 
                 if (_settings.Current.PomodoroEnabled && _pomodoroActive)
-                    AdvancePomodoroPhase();
+                {
+                    ComputeNextPhase();
+                    var (notifTitle, notifMsg) = _currentPhase == PomodoroPhase.Focus
+                        ? ("Focus Complete!", $"Great work! Ready for {NextPhaseLabel.Replace("Start ", "")}?")
+                        : ("Break Over", "Time to get back to focus!");
+                    _notification.ShowSessionCompleted(notifTitle, notifMsg);
+                    _waitingForNext = true;
+                    CanStartNext = true;
+                    SessionStatusDisplay = $"Done — click {NextPhaseLabel}";
+                }
+                else
+                {
+                    _notification.ShowSessionCompleted("Session Complete", $"{s.Name} finished!");
+                }
             }));
 
         // Commands
@@ -163,8 +192,21 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             _pomodoroActive = false;
             _completedCycles = 0;
             _currentPhase = PomodoroPhase.Focus;
+            _waitingForNext = false;
+            CanStartNext = false;
             _session.Reset();
             SessionStatusDisplay = "No session";
+        });
+
+        StartNextCommand = ReactiveCommand.Create(() =>
+        {
+            _waitingForNext = false;
+            CanStartNext = false;
+            // Count the focus session that just completed
+            if (_currentPhase == PomodoroPhase.Focus)
+                _completedCycles++;
+            _currentPhase = _nextPhase;
+            StartNextPomodoroPhase();
         });
 
         CloseCommand = ReactiveCommand.Create(() => Environment.Exit(0));
@@ -173,21 +215,28 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             OpenSettingsInteraction.Handle(Unit.Default));
     }
 
-    private void AdvancePomodoroPhase()
+    private void ComputeNextPhase()
     {
         var s = _settings.Current;
         if (_currentPhase == PomodoroPhase.Focus)
         {
-            _completedCycles++;
-            _currentPhase = (_completedCycles % s.CyclesBeforeLongBreak == 0)
+            int nextCycles = _completedCycles + 1;
+            _nextPhase = (nextCycles % s.CyclesBeforeLongBreak == 0)
                 ? PomodoroPhase.LongBreak
                 : PomodoroPhase.ShortBreak;
         }
         else
         {
-            _currentPhase = PomodoroPhase.Focus;
+            _nextPhase = PomodoroPhase.Focus;
         }
-        StartNextPomodoroPhase();
+
+        NextPhaseLabel = _nextPhase switch
+        {
+            PomodoroPhase.Focus      => "Start Focus",
+            PomodoroPhase.ShortBreak => "Start Break",
+            PomodoroPhase.LongBreak  => "Start Long Break",
+            _                        => "Next"
+        };
     }
 
     private void StartNextPomodoroPhase()
@@ -244,10 +293,10 @@ public class MainWindowViewModel : ViewModelBase, IDisposable
             };
         }
 
-        CanStart  = !s.IsRunning || s.IsCompleted;
+        CanStart  = (!s.IsRunning || s.IsCompleted) && !_waitingForNext;
         CanPause  = s.IsRunning && !s.IsPaused && !s.IsCompleted;
         CanResume = s.IsPaused;
-        CanReset  = s.IsRunning || s.IsPaused || s.IsCompleted;
+        CanReset  = s.IsRunning || s.IsPaused || s.IsCompleted || _waitingForNext;
     }
 
     // Called by App.axaml.cs after settings are saved

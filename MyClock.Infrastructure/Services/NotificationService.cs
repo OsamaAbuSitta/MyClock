@@ -9,11 +9,11 @@ public class NotificationService : INotificationService
 
     public void SetManager(INotificationManager manager) => _manager = manager;
 
-    public void ShowSessionCompleted(string sessionName)
+    public void ShowSessionCompleted(string title, string message)
     {
         _manager?.Show(new Notification(
-            title: "Session Complete",
-            message: $"{sessionName} has ended.",
+            title: title,
+            message: message,
             type: NotificationType.Success));
     }
 

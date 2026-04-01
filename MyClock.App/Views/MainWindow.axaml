@@ -145,6 +145,11 @@
                         Command="{Binding ResetCommand}"
                         IsVisible="{Binding CanReset}"
                         FontSize="11" Padding="8 3"/>
+                <Button Classes="green"
+                        Content="{Binding NextPhaseLabel}"
+                        Command="{Binding StartNextCommand}"
+                        IsVisible="{Binding CanStartNext}"
+                        FontSize="11" Padding="8 3"/>
             </StackPanel>
 
         </StackPanel>
